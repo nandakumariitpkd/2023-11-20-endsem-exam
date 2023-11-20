@@ -27,20 +27,19 @@ elif [[ ! -r "$f1" ]] || [[ ! -r "$f2" ]] || [[ ! -w "$f1" ]] || [[ ! -w "$f2" ]
 	>&2 echo "At least one of the files is not readable/writeable."; exit "$EC_FILENORW"
 fi
 
-tmpf="$(tempfile)"
-
 function onerr {
 	>&2 echo "Something went wrong.";
-	rm "$tmpf"
 
 	# This seems to have no effect on an interruption
 	exit "$EC_OTHER"
 }
 
-mv "$f1" "$tmpf" || onerr
-mv "$f2" "$f1" || onerr
-mv "$tmpf" "$f2" || onerr
+# The question asks not to swap by renaming
 
-# No need to delete $tmpf as it has been moved.
+f1cont="$(cat "$f1")" || onerr
+f2cont="$(cat "$f2")" || onerr
+
+echo "$f1cont" > "$f2" || onerr
+echo "$f2cont" > "$f1" || onerr
 
 exit "$EC_SUCCESS"
